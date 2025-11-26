@@ -13,9 +13,12 @@
 
         <div id="imgBox">
             <img src="" id="qrImage">
+            <canvas id="qrCanvas" style="display:none;"></canvas>
         </div>
-
+        
         <button onclick="generateurCodeQR()">Générer le code QR</button>
+
+        <button id="downloadBtn" onclick="telechargerQRCode()" style="display:none;"> Télécharger le QR Code</button>
     </div>
 
     <script>
@@ -26,8 +29,25 @@
 
         function generateurCodeQR(){
             if(qrText.value.length > 0){
-                qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + qrText.value;
-                imgBox.classList.add("show-img")
+                const url= "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + qrText.value;
+                
+                qrImage.crossOrigin = "anonymous";
+                qrImage.src = url;
+
+                qrImage.onload = function() {
+                    imgBox.classList.add("show-img");
+                    document.getElementById("downloadBtn").style.display = "block";
+
+                    // Dessiner dans le canvas
+                    let canvas = document.getElementById("qrCanvas");
+                    let ctx = canvas.getContext("2d");
+
+                    canvas.width = qrImage.width;
+                    canvas.height = qrImage.height;
+
+                    ctx.drawImage(qrImage, 0, 0);
+                };
+
             }else{
                 qrText.classList.add('error')
                 setTimeout(()=>{
@@ -35,6 +55,17 @@
                 },1000)
             }
         }
+
+        function telechargerQRCode(){
+            let canvas = document.getElementById("qrCanvas");
+
+            const lien = document.createElement("a");
+            lien.download = "qr-code.png";  // nom du futur fichier
+            lien.href = canvas.toDataURL("image/png");
+
+            lien.click();
+        }
+
     </script>
 </body>
 </html>
